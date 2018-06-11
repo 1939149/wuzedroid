@@ -100,7 +100,7 @@ echo -e $r"|               |                                                  "$
 echo -e $r"|_______________|                                                  "$e
 echo -e $r"| ________GF337 |                                                  "$e
 echo -e $r"||   wuseman   ||                             _           _     _  "$e
-echo -e $r"||             ||          version 1.0       | |         (_)   | | "$e
+echo -e $r"||             ||          version 1.2       | |         (_)   | | "$e
 echo -e $r"||_____________|| __      ___   _ _______  __| |_ __ ___  _  __| | "$e
 echo -e $r"|___---------___| \ \ /\ / / | | |_  / _ \/ _  |  __/ _ \| |/ _  | "$e
 echo -e $r"|---------------|  \ V  V /| |_| |/ /  __/ (_| | | | (_) | | (_| | "$e
@@ -126,7 +126,20 @@ OPTION='Please enter your choice from below list: '
 options=("Start adb-server"
          "Kill adb-server"
          "Reboot my device"
+         "Preview android version"
          "Enter adb shell"
+         "Enter shell"
+         "Restart USB mode"    
+         "Restart WIFI mode"
+         "View wifi passwords stored on device"
+         "Connect to my device by wifi"
+         "Bruteforce pin lock"
+         "Copy files from your computer to your phone"
+         "Copy files from your phone to your computer"
+         "Install application"
+         "Uninstall application"
+         "Update/Upgrade application"
+         "Make a call"
          "Quit")
 
 select opt in "${options[@]}"
@@ -210,6 +223,7 @@ do
         echo "1) Reboot system as Normal"
         echo "2) Reboot to Bootloader (fasbtoot)"
         echo "3) Reboot to Recovery Mode"
+
         echo "q) Quit"
         echo
 
@@ -240,6 +254,13 @@ done
 exit 0
 ;;
 
+                       "Show current Android version")
+                       echo -e "\nCurrent android version:"
+                       adb shell getprop ro.build.version.release 
+                       echo ""
+                       ;;
+
+
                        "Enter adb shell")
                        echo -e "\nPlease wait, checking status of your device...\n"
                        adb shell 'su -c ' 
@@ -251,13 +272,120 @@ exit 0
                        no) exit 0;;
                        esac
                        ;;
+ 
+                       
+                       "Enter shell")
+                       echo -e "\nTrying to enter your device terminal...\n"
+                       adb shell 'su -c echo -e "Connection works fine: yes/no"'
+                       read -p "Want me to connect for real: " yesno
+                       case $yesno in
+                       yes) adb shell;;
+                       no) exit 0;;
+                       esac
+                       ;;
+
+
+                      "Restart USB mode")
+                      adb usb
+                      ;;
+
+                      "Restart WIFI  mode")
+                      adb wifi
+                      ;;
+
+
+                      "View wifi passwords stored on device")
+                      echo -e  "\n----- W I F I - P W D S -----\n"
+                      adb shell 'su -c cat /data/misc/wifi/wpa_supplicant.conf' | \
+                      while read -r line; do echo; echo -e "$line"; done | \
+                      grep 'psk' | tr -d 'psk=' | tr -d '"' 
+                      echo -e "\n-----------------------------"
+                      ;;
+
+                      "Connect to my device by wifi")
+                       read -p "Device ip: " ip
+                       read -p "Device port: " port
+                       adb connect $ip:$port
+                       ;;
+
+                      "Bruteforce pin lock")
+                      echo ----------------------------
+                      echo PLEASE WAIT
+                      echo ----------------------------
+                      adb shell input keyevent 82
+                      adb shell input swipe 407 1211 378 85
+                      echo ----------------------------
+                      echo BRUTE FORCING
+                      echo ----------------------------
+                      for i in {0000..9999}; do
+                      echo -----------------------------
+                      echo TRYING $i
+                      echo -----------------------------
+                      for (( j=0; j<${#i}; j++ )); do
+                      adb shell input keyevent $((`echo ${i:$j:1}`+7))
+                      done
+                      adb shell input keyevent 66
+                      if ! (( `expr $i + 1` % 5 )); then
+                      adb shell input keyevent 66
+                      sleep 30
+                      adb shell input keyevent 82
+                      adb shell input swipe 407 1211 378 85
+                      fi
+                      done
+                      ;;
+
+
+                     "Copy files from your computer to your phone")
+                     read -p "Source file to send: " source_file
+                     read -p "Folder to place $source_file: " destination
+                     adb push $source_file $destination
+                     echo ""
+                     ;;
+
+                     "Copy files from your phone to your computer")
+                     read -p "Source file you want transfer to your computer: " android_source_file
+                     read -p "Where to store it on your computer: " pc_source
+                     adb pull $android_source_file $pc_source
+                     echo ""
+                     ;;
+
+                    "Install application")
+                    "Where is your apk file stored? (/path/to/appklication/application.apk) " apk_file
+                    adb -e install $apk_file
+                    echo ""
+                    ;; 
+
+                    "Uninstall application")
+                    "Where is your apk file stored? (/path/to/appklication/application.apk) " apk_file_to_uninstall
+                    adb -e install $apk_file_to_uninstall
+                    echo ""
+                    ;; 
+
+
+                    "Update/Upgrade application")
+                    "Where is your apk file stored? (/path/to/appklication/application.apk) " apk_file_to_update
+                    adb install -r $apk_file_to_uninstall # //  -r means re-install the app and keep its data on the device.
+                    echo ""
+                    ;; 
+
+
+                    "Make a call")
+                    read -p "Enter the number you wanna call: +467" number
+                    adb shell am start -a android.intent.action.CALL -d tel:46+$number # // Make a call
+                    echo ""
+                    ;;
 
 
 
-        "Quit")
-            break
-            ;;
-        *) echo "Sorry, that value has not been added yet, 1-36 is your options..."
+
+
+
+                  
+
+                   "Quit")
+                   break
+                   ;;
+                      *) echo "Sorry, that value has not been added yet, 1-36 is your options..."
         ;;
     esac
 done
