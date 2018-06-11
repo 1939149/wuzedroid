@@ -1,0 +1,22 @@
+################################################
+## Author: wuseman
+## Developer: wuseman
+################################################
+
+# 1.2 New features has been added:
++ ------------------------------------
++ Preview android version
++ Restart USB / Wifi mode
++ Preview wifi passwords stored on device
++ Bruteforce pin locks
++ Copy files to and from phone
++ Install / Uninstall / Update / Upgrade applications
++ You now even can make a call directly from this tool
+
+
+# 1.0  wuzedroid has been released 2018-06-11 with minimal features
++ ------------------------------------
++ Start and Kill adb
++ Reboot device into Normal, Recovery, Bootloader
++ Enter shell 
+
