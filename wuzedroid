@@ -51,6 +51,7 @@ b='\e[1;34m'
 c='\e[1;36m'
 w='\e[0;32m'
 e='\e[0m'
+
 red=`tput setaf 1`
 green=`tput setaf 2`
 reset=`tput sgr0`
@@ -60,6 +61,18 @@ NC='\033[0m' # No Color
 # Features for upcomming release.
 #CFG_FILE="/etc/wuzedroid/wuzedroid.conf"
 #CONTACTS="/etc/wuzedroid/contacts_for_adb.txt"
+
+
+
+if [ -x adb ];
+  then
+echo -e "\nThis tool require adb to run\n"
+read -p "Want me to install adb for you? (yes/no) " yepadb
+case $yepadb in
+     yes) emerge --sync; emerge --ask dev-util/android-tools ;;
+       *) exit 1 ;;
+esac
+fi
 
 if [[ $EUID -ne 0 ]]; then
   echo -e "\nYou must be Administrator to run this script\n" 2>&1
@@ -140,6 +153,8 @@ options=("Start adb-server"
          "Uninstall application"
          "Update/Upgrade application"
          "Make a call"
+         "Send sms"
+         "Delete entire SMS db"
          "Quit")
 
 select opt in "${options[@]}"
@@ -370,17 +385,32 @@ exit 0
 
 
                     "Make a call")
+                    adb kill-server; adb start-server
+                    echo -e "\n-----------------------------------------------"
                     read -p "Enter the number you wanna call: +467" number
                     adb shell am start -a android.intent.action.CALL -d tel:46+$number # // Make a call
+                    echo -e $g"\nPlease pick up your phone, calling +467$number"$e
+                    read -p $red"Please press any button hang up the call:$e " endcall
+                    echo -e "\nThe call has now been stopped.."
+                    echo -e "\n-----------------------------------------------"
+                    adb shell input keyevent 6
                     echo ""
+                    exit 1
                     ;;
 
+                    "Send sms")
+                    read -p "Send to: +46"
+                    read -p "Text to send: $texttosend"
+                    adb shell am start -a android.intent.action.SENDTO -d sms:+46$smsnumver --es sms_body "$texttosend" --ez exit_on_sent true
+                    sleep 1; adb shell input keyevent 22; sleep 1; adb shell input keyevent 66
+                    echo "Sms has been sent"
+                    ;;
 
-
-
-
-
-                  
+                    "Delete entire SMS db")
+                    read -p "are you REALLY sure? (press CTRL+c to cancel) " delem
+                     adb shell 'su -c' rm /data/data/com.android.providers.telephony/databases/mmssms.db 
+                     adb reboot 
+                    echo "We have now deleted your mms/sms database, phone is now rebooting";;
 
                    "Quit")
                    break
