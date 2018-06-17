@@ -1,4 +1,4 @@
-![alt text](https://sendit.nu/f/HbKmyBFQcgj_%3Fg.png)
+![alt text](https://sendit.nu/f/CnT_SLPx5g%21s_v.png)
 
 # wuzedroid
 ==========
