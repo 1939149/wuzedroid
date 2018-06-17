@@ -3,6 +3,13 @@
 ## Developer: wuseman
 ################################################
 
+# 1.3 New features has been added:
++ ------------------------------------
++ Fixed minor bugs
++ Pres any key to end the call if you calling
++ Send SMS directly from cli
++ Delete all SMS 
+
 # 1.2 New features has been added:
 + ------------------------------------
 + Preview android version
